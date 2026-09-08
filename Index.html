@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Golf Prize Calculator</title>
+<style>
+:root{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  --bg:#f4f6f4;--card:#fff;--ink:#17211c;--muted:#68746d;--accent:#153d2e;--line:#dfe5e1;--soft:#edf4ef;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:18px 14px 32px}
+h1{font-size:26px;line-height:1.15;margin:4px 0 6px}
+.sub{font-size:14px;color:var(--muted);margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:18px;margin:0 0 10px}
+.row{display:grid;grid-template-columns:1fr 135px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid #edf0ee}
+.row:last-child{border-bottom:0}
+label{font-size:15px}
+select,input{
+  width:100%;font-size:17px;min-height:44px;border:1px solid #ccd5cf;border-radius:10px;
+  background:#fff;color:var(--ink);padding:8px 10px;text-align:right;
+}
+.output{font-weight:700;font-size:18px;text-align:right}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.tile{background:var(--soft);padding:12px;border-radius:12px}
+.tile span{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.tile strong{font-size:25px;color:var(--accent)}
+.payouts{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.place{background:var(--soft);border-radius:10px;padding:9px 5px;text-align:center}
+.place span{display:block;font-size:12px;color:var(--muted)}
+.place strong{font-size:17px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 4px;border-bottom:1px solid #edf0ee;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.warn{display:none;margin-top:10px;padding:9px 10px;border-radius:10px;background:#fff4da;border:1px solid #ead18f;font-size:13px}
+button{
+  width:100%;min-height:44px;border:0;border-radius:10px;background:var(--accent);color:#fff;
+  font-size:16px;font-weight:700;margin-top:10px
+}
+@media (max-width:520px){
+  .row{grid-template-columns:1fr 120px}
+  .payouts{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Golf Team Game Prize Calculator</h1>
+  <div class="sub">iPad/iPhone-safe version — dropdowns are built directly into the page.</div>
+
+  <div class="card">
+    <h2>Event setup</h2>
+
+    <div class="row">
+      <label for="players">Number of players</label>
+      <input id="players" type="number" min="4" max="60" step="1" value="11">
+    </div>
+
+    <div class="row">
+      <label for="buyin">Buy-in per player</label>
+      <select id="buyin">
+        <option value="40">$40</option>
+        <option value="50" selected>$50</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="skins">Skins buy-in</label>
+      <select id="skins">
+        <option value="10">$10</option>
+        <option value="15">$15</option>
+        <option value="20">$20</option>
+        <option value="25" selected>$25</option>
+        <option value="30">$30</option>
+        <option value="35">$35</option>
+        <option value="40">$40</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="greenie">Greenie value × 4</label>
+      <select id="greenie">
+        <option value="10" selected>$10</option>
+        <option value="20">$20</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="front">Front 9 game pot</label>
+      <select id="front">
+        <option value="0" selected>$0</option>
+        <option value="10">$10</option>
+        <option value="15">$15</option>
+        <option value="20">$20</option>
+        <option value="25">$25</option>
+        <option value="30">$30</option>
+        <option value="35">$35</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="back">Back 9 game pot</label>
+      <select id="back">
+        <option value="0" selected>$0</option>
+        <option value="10">$10</option>
+        <option value="15">$15</option>
+        <option value="20">$20</option>
+        <option value="25">$25</option>
+        <option value="30">$30</option>
+        <option value="35">$35</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="tip">Waitstaff tip</label>
+      <input id="tip" type="number" min="0" step="5" value="10">
+    </div>
+
+    <button type="button" id="recalc">Recalculate</button>
+  </div>
+
+  <div class="card">
+    <h2>Prize summary</h2>
+    <div class="summary">
+      <div class="tile"><span>Total pot</span><strong id="totalPot">$0</strong></div>
+      <div class="tile"><span>Team game pot</span><strong id="teamPot">$0</strong></div>
+    </div>
+    <div class="row"><label>Minimum skins pot</label><div class="output" id="skinsPot">$0</div></div>
+    <div class="row"><label>Greenies total</label><div class="output" id="greeniesTotal">$0</div></div>
+    <div class="row"><label>Front 9 allocation</label><div class="output" id="frontOut">$0</div></div>
+    <div class="row"><label>Back 9 allocation</label><div class="output" id="backOut">$0</div></div>
+    <div class="row"><label>Waitstaff tip</label><div class="output" id="tipOut">$0</div></div>
+    <div class="warn" id="warning"></div>
+  </div>
+
+  <div class="card">
+    <h2>Team game payout</h2>
+    <div class="note" id="fieldNote"></div>
+    <div class="payouts" id="payouts" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Skins values</h2>
+    <table>
+      <thead>
+        <tr><th>Skins</th><th>Each</th><th>Paid</th><th>Remainder</th></tr>
+      </thead>
+      <tbody id="skinsRows"></tbody>
+    </table>
+    <div class="note">Each skin is rounded down to the nearest $5.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function el(id){ return document.getElementById(id); }
+  function num(id){ return Number(el(id).value || 0); }
+  function money(n){ return '$' + Math.max(0, Math.round(n)).toLocaleString(); }
+  function floor5(n){ return Math.floor(n/5)*5; }
+
+  var splitRows = {
+    2:[0.70,0.30,0,0,0],
+    3:[0.55,0.30,0.15,0,0],
+    4:[0.50,0.25,0.15,0.10,0],
+    5:[0.50,0.25,0.12,0.08,0.05]
+  };
+
+  function calc(){
+    var players = Math.max(0, Math.round(num('players')));
+    var buyin = num('buyin');
+    var skinsBuyin = num('skins');
+    var greenie = num('greenie');
+    var front = num('front');
+    var back = num('back');
+    var tip = num('tip');
+
+    var total = players * buyin;
+    var skinsPot = players * skinsBuyin;
+    var greenies = greenie * 4;
+    var teamPot = total - skinsPot - greenies - front - back - tip;
+
+    el('totalPot').textContent = money(total);
+    el('skinsPot').textContent = money(skinsPot);
+    el('greeniesTotal').textContent = money(greenies);
+    el('frontOut').textContent = money(front);
+    el('backOut').textContent = money(back);
+    el('tipOut').textContent = money(tip);
+    el('teamPot').textContent = money(teamPot);
+
+    var places = Math.round(players * 0.30);
+    if (places < 2) places = 2;
+    if (places > 5) places = 5;
+
+    var splits = splitRows[places];
+    var html = '';
+    for (var i=0; i<5; i++){
+      var payout = floor5(Math.max(0, teamPot) * splits[i]);
+      var ord = ['1st','2nd','3rd','4th','5th'][i];
+      html += '<div class="place"><span>'+ord+'</span><strong>'+money(payout)+'</strong></div>';
+    }
+    el('payouts').innerHTML = html;
+    el('fieldNote').textContent = 'Top ~30% of the field = ' + places + ' payout places.';
+
+    var rows = '';
+    for (var s=1; s<=12; s++){
+      var each = floor5(skinsPot/s);
+      var paid = each*s;
+      var rem = skinsPot-paid;
+      rows += '<tr><td>'+s+'</td><td>'+money(each)+'</td><td>'+money(paid)+'</td><td>'+money(rem)+'</td></tr>';
+    }
+    el('skinsRows').innerHTML = rows;
+
+    var warning = el('warning');
+    if (teamPot < 0){
+      warning.style.display = 'block';
+      warning.textContent = 'Allocations exceed the non-skins pot by ' + money(-teamPot) + '.';
+    } else {
+      warning.style.display = 'none';
+      warning.textContent = '';
+    }
+  }
+
+  var controls = ['players','buyin','skins','greenie','front','back','tip'];
+  for (var i=0;i<controls.length;i++){
+    el(controls[i]).addEventListener('change', calc);
+    el(controls[i]).addEventListener('input', calc);
+  }
+  el('recalc').addEventListener('click', calc);
+  calc();
+})();
+</script>
+</body>
+</html>
